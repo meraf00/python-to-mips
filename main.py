@@ -12,8 +12,8 @@ def save_file(filename, content):
 
 
 if __name__ == "__main__":
-    fname = "io"
     fname = "maths"
+    fname = "io"
 
     py_source_code = load_file(f"python_codes/{fname}.py")
 

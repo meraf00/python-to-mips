@@ -1,7 +1,7 @@
 import dis
 from collections import defaultdict
 from .mips_instructions import Assign, Add, Subtract, Multiply, Divide
-from .mips_constructs import Register, RegisterTracker, Address
+from .mips_constructs import MemoryLocation, Register, RegisterTracker, Address
 from .consts import PREDEFINED_DATA_SEGMENTS, BUILT_INS
 
 
@@ -45,6 +45,10 @@ class Compiler:
                 mips_code = f'\t{label}: .word {value}'
                 data.append(mips_code)
 
+            elif isinstance(value, MemoryLocation):
+                mips_code = f'\t{label}: .word {value}'
+                data.append(mips_code)
+
         return "\n".join(data)
 
     def generate_text_segment(self):
@@ -56,6 +60,7 @@ class Compiler:
 
         for ins in self.instructions:
             libraries.add(ins.__class__)
+            libraries.union(ins.REQUIRE)
             mips_code = ins.mips_code()
             code.append(mips_code)
 
@@ -79,8 +84,7 @@ class Compiler:
         stack = self.stack
 
         for ins in dis.get_instructions(python_code):
-            print(ins)
-            print(stack,  namespace, end="\n\n")
+            
             if ins.opname == "LOAD_NAME":
                 name = Address(ins.argval)
                 if name in namespace or name in BUILT_INS:
@@ -196,6 +200,8 @@ class Compiler:
                 instruction = instruction_class(*args, namespace=namespace)
                 instructions.append(instruction)
 
+                stack.append(Register("$v0", instruction_class.return_type))
+
             elif ins.opname == "CALL_FUNCTION_KW":
                 keys = namespace[stack[-1]]
 
@@ -209,7 +215,7 @@ class Compiler:
                 for key, value in zip(keys, kwargs_values):
                     kwargs[key] = value
 
-                print(stack, "\n", args, "\n", kwargs)
+                print(stack, "\n?", args, "\n?", kwargs)
 
                 for _ in range(argc + kwargc - 1):
                     stack.pop()
@@ -252,6 +258,8 @@ class Compiler:
                         left_operand, right_operand, result_register, namespace=namespace)
 
                 instructions.append(instruction)
+            print(ins)
+            print(stack,  namespace, end="\n\n")
 
     def to_mips(self):
         self.compile()

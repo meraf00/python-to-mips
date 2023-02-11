@@ -1,4 +1,4 @@
-from .mips_constructs import Register, Address
+from .mips_constructs import Register, Address, MemoryLocation
 
 
 class Print:
@@ -17,6 +17,8 @@ class Print:
                 jr $ra
         """
     )
+    REQUIRE = tuple()
+    return_type = MemoryLocation
 
     def __init__(self, *args, namespace=None, **kwargs):
         self.args = args
@@ -128,6 +130,9 @@ class Print:
                 elif isinstance(content, str):
                     code.append(self.print_string(arg))
 
+                elif isinstance(content, MemoryLocation):
+                    code.append(self.print_referenced_string(arg))
+
                 elif isinstance(content, (tuple, list)):
                     code.append(self.print_list(content))
 
@@ -149,18 +154,27 @@ class Print:
 
 class Input:
     INCLUDE = (
-        """input:
-                    addiu $sp, $sp, -200
-                    move $a0, $sp
-                    li $a1, 200
-                    li $v0, 8
-                    syscall
+        """input:                
+                li $a0, 200     # allocate heap
+                li $v0, 9
+                syscall
+                
+                move $t1, $v0   # address of input string
+                
+                move $a0, $t1   # get user input
+                li $a1, 200
+                li $v0, 8
+                syscall
                     
-                    move $v0, $sp	
-                    addiu $sp, $sp, 32
-                    
-                    jr $ra""",
+                move $v0, $t1 	# return address of input string
+                
+                jr $ra""",
     )
+
+    REQUIRE = (
+        Print,
+    )
+    return_type = MemoryLocation
 
     def __init__(self, *args, namespace=None, **kwargs):
         self.args = args
@@ -168,4 +182,10 @@ class Input:
         self.namespace = namespace
 
     def mips_code(self):
-        return ""
+        prompt = Print(*self.args, namespace=self.namespace,
+                       end=" ").mips_code()
+
+        take_input = """
+                   jal input"""
+
+        return "\n\n".join([prompt, take_input])

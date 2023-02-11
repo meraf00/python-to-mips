@@ -34,18 +34,18 @@ main: # (Entry Point)
 
                    lw $t8, x
                    lw $t9, y
-                   mul $s5, $t8, $t9
+                   mul $t0, $t8, $t9
 
 
-                   sw $s5, z
+                   sw $t0, z
 
 
                    lw $t8, x
                    lw $t9, y
-                   div $s5, $t8, $t9
+                   div $t0, $t8, $t9
 
 
-                   sw $s5, a
+                   sw $t0, a
 
 
                    la $t1, str_literal_0
@@ -101,7 +101,7 @@ main: # (Entry Point)
 
                    lw $t8, y
                    lw $t9, x
-                   div $s5, $t8, $t9
+                   div $t0, $t8, $t9
 
 
                    la $t1, str_literal_3
@@ -112,7 +112,7 @@ main: # (Entry Point)
                    li $v0, 11
                    syscall
 
-                   move $a0, $s5
+                   move $a0, $t0
                    li $v0, 1
                    syscall
 
@@ -140,35 +140,35 @@ main: # (Entry Point)
 
                    lw $t8, x
                    lw $t9, y
-                   add $s5, $t8, $t9
+                   add $t0, $t8, $t9
 
 
-                   move $t8, $s5
+                   move $t8, $t0
                    lw $t9, z
-                   sub $s5, $t8, $t9
+                   sub $t0, $t8, $t9
 
 
-                   move $t8, $s5
+                   move $t8, $t0
                    lw $t9, z
-                   add $s5, $t8, $t9
+                   add $t0, $t8, $t9
 
 
-                   move $t8, $s5
+                   move $t8, $t0
                    lw $t9, y
-                   sub $s5, $t8, $t9
+                   sub $t0, $t8, $t9
 
 
                    lw $t8, x
                    lw $t9, z
-                   mul $t7, $t8, $t9
+                   mul $t4, $t8, $t9
 
 
-                   move $t8, $s5
-                   move $t9, $t7
-                   sub $s5, $t8, $t9
+                   move $t8, $t0
+                   move $t9, $t4
+                   sub $t0, $t8, $t9
 
 
-                   sw $s5, a
+                   sw $t0, a
 
 
                    la $t1, a
@@ -190,20 +190,20 @@ main: # (Entry Point)
 
                    lw $t8, x
                    lw $t9, x
-                   add $s5, $t8, $t9
+                   add $t0, $t8, $t9
 
 
-                   move $t8, $s5
+                   move $t8, $t0
                    lw $t9, x
-                   add $s5, $t8, $t9
+                   add $t0, $t8, $t9
 
 
-                   move $t8, $s5
+                   move $t8, $t0
                    lw $t9, y
-                   sub $s5, $t8, $t9
+                   sub $t0, $t8, $t9
 
 
-                   move $a0, $s5
+                   move $a0, $t0
                    li $v0, 1
                    syscall
 

@@ -3,6 +3,7 @@ from .mips_constructs import Register, Address
 
 class Assign:
     INCLUDE = tuple()
+    REQUIRE = tuple()
 
     def __init__(self, address, value, namespace=None):
         self.namespace = namespace
@@ -37,6 +38,7 @@ class Assign:
 
 class Add:
     INCLUDE = tuple()
+    REQUIRE = tuple()
 
     def __init__(self, left_operand, right_operand, destination, namespace=None):
         self.left_operand = left_operand
@@ -107,6 +109,7 @@ class Add:
 
 class Subtract:
     INCLUDE = tuple()
+    REQUIRE = tuple()
 
     def __init__(self, left_operand, right_operand, destination, namespace=None):
         self.left_operand = left_operand
@@ -202,6 +205,7 @@ class Subtract:
 
 class Multiply:
     INCLUDE = tuple()
+    REQUIRE = tuple()
 
     def __init__(self, left_operand, right_operand, destination, namespace=None):
         self.left_operand = left_operand
@@ -272,6 +276,7 @@ class Multiply:
 
 class Divide:
     INCLUDE = tuple()
+    REQUIRE = tuple()
 
     def __init__(self, left_operand, right_operand, destination, namespace=None):
         self.left_operand = left_operand

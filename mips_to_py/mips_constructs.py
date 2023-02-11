@@ -48,6 +48,23 @@ class Register:
         return hash(self.name)
 
 
+class MemoryLocation:
+    def __init__(self, location=0):
+        self.location = location
+
+    def __str__(self):
+        return f"{self.location}"
+
+    def __repr__(self):
+        return f"<{self.location}>"
+
+    def __eq__(self, other):
+        return self.__hash__() == other.__hash__()
+
+    def __hash__(self):
+        return hash(self.location)
+
+
 class Address:
     def __init__(self, address_name):
         self.address_name = address_name
