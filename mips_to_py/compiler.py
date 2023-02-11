@@ -1,8 +1,9 @@
 import dis
 from collections import defaultdict
-from .mips_instructions import Assign, Add, Subtract, Multiply
+from .mips_instructions import Assign, Add, Subtract, Multiply, Divide
 from .mips_constructs import Register, RegisterTracker, Address
 from .consts import PREDEFINED_DATA_SEGMENTS, BUILT_INS
+
 
 class Compiler:
     def __init__(self, py_source_code):
@@ -13,12 +14,12 @@ class Compiler:
         self.registers = RegisterTracker(self.stack)
 
         self.instructions = []
-        
+
     def get_instruction(self, function):
         if function in BUILT_INS:
             return BUILT_INS.get(function)
 
-    def generate_data_segment(self, include_predefined=True):        
+    def generate_data_segment(self, include_predefined=True):
         data = [".data"]
 
         for label, value in PREDEFINED_DATA_SEGMENTS.items():
@@ -34,7 +35,7 @@ class Compiler:
             elif isinstance(value, str):
                 mips_code = f'\t{label}: .asciiz "{value}"'
                 data.append(mips_code)
-            
+
             elif isinstance(value, (list, tuple)):
                 elements = " ".join(map(str, value))
                 mips_code = f'\t{label}: .word {elements}'
@@ -48,19 +49,19 @@ class Compiler:
 
     def generate_text_segment(self):
         libraries = set()
-        
+
         functions = ["# Functions"]
-        
+
         code = ["main: # (Entry Point)"]
 
-        for ins in self.instructions:            
+        for ins in self.instructions:
             libraries.add(ins.__class__)
             mips_code = ins.mips_code()
             code.append(mips_code)
-        
+
         include = ["# Library"]
         for library in libraries:
-            include.append("\n".join(library.INCLUDE))    
+            include.append("\n".join(library.INCLUDE))
 
         text_segment = [".text", "j main # jump to main (entry point)"]
         text_segment.extend(include)
@@ -84,29 +85,29 @@ class Compiler:
                 name = Address(ins.argval)
                 if name in namespace or name in BUILT_INS:
                     stack.append(name)
-            
+
             elif ins.opname in set(("STORE_NAME", "STORE_FAST", "STORE_GLOBAL")):
-                address = Address(ins.argval)        
+                address = Address(ins.argval)
                 value = stack.pop()
-                
+
                 # update variable
                 if address in namespace:
-                    instructions.append(Assign(address, value, namespace))            
-                
-                elif isinstance(value, Address):  
+                    instructions.append(Assign(address, value, namespace))
+
+                elif isinstance(value, Address):
                     # allow indirect reference to strings
                     if isinstance(namespace[value], str):
-                        namespace[address] = value                
-                    
+                        namespace[address] = value
+
                     # indirect reference to tuples and lists is not allowed
                     else:
-                        namespace[address] = namespace[value]   
+                        namespace[address] = namespace[value]
 
                 # store value of operation to memory (return value of operation is stored in register)
                 elif isinstance(value, Register):
                     namespace[address] = value.dtype()
                     instructions.append(Assign(address, value, namespace))
-                
+
                 else:
                     namespace[address] = value
 
@@ -114,13 +115,14 @@ class Compiler:
                 value = ins.argval
 
                 if isinstance(value, str):
-                    address = Address(f"str_literal_{data_type_counter['str']}")
+                    address = Address(
+                        f"str_literal_{data_type_counter['str']}")
                     data_type_counter['str'] += 1
 
                     namespace[address] = value
                     stack.append(address)
-                
-                elif isinstance(value, tuple):   
+
+                elif isinstance(value, tuple):
                     # python doesn't build tuple unless list is inside it
                     # so we should bu
                     # ild it ourselves if string is contained inside tuple
@@ -131,15 +133,17 @@ class Compiler:
                             str_exist = True
                         elif isinstance(element, list):
                             list_exist = True
-                        
-                        if str_exist and list_exist: break
-                    
+
+                        if str_exist and list_exist:
+                            break
+
                     # we will need to build the tuple ourselves in this case
                     if str_exist and not list_exist:
                         new_tuple = []
                         for element in value:
                             if isinstance(element, str):
-                                address = Address(f"str_literal_{data_type_counter['str']}")
+                                address = Address(
+                                    f"str_literal_{data_type_counter['str']}")
                                 data_type_counter['str'] += 1
 
                                 namespace[address] = element
@@ -149,27 +153,26 @@ class Compiler:
 
                             else:
                                 new_tuple.append(element)
-                        
+
                         value = tuple(new_tuple)
-                    
+
                     address = Address(f"tuple_{data_type_counter['tuple']}")
                     data_type_counter['tuple'] += 1
 
                     namespace[address] = value
                     stack.append(address)
-                    
 
                 elif isinstance(value, (int, float)):
                     stack.append(value)
-                
+
             elif ins.opname == "BUILD_LIST" or ins.opname == "BUILD_TUPLE":
                 list_length = ins.arg
-                
+
                 if list_length == 0:
                     continue
 
                 list_elements = stack[-list_length:]
-                
+
                 for _ in range(list_length):
                     stack.pop()
 
@@ -179,46 +182,46 @@ class Compiler:
 
                 namespace[address] = list_elements
                 stack.append(address)
-            
+
             elif ins.opname == "CALL_FUNCTION":
                 argc = ins.arg
                 args = stack[-argc:]
-                
+
                 for _ in range(argc):
                     stack.pop()
 
                 function = stack.pop()
 
-                instruction_class = self.get_instruction(function)  
+                instruction_class = self.get_instruction(function)
                 instruction = instruction_class(*args, namespace=namespace)
-                instructions.append(instruction)  
+                instructions.append(instruction)
 
-            elif ins.opname == "CALL_FUNCTION_KW":                
-                keys = namespace[stack[-1]]             
-                
+            elif ins.opname == "CALL_FUNCTION_KW":
+                keys = namespace[stack[-1]]
+
                 argc = ins.arg
                 kwargc = len(keys)
-                
+
                 args = stack[-(argc+kwargc-1):-(kwargc+1)]
                 kwargs_values = stack[-(kwargc+1):-1]
-                
+
                 kwargs = {}
                 for key, value in zip(keys, kwargs_values):
                     kwargs[key] = value
 
-                print(stack, "\n",args, "\n",kwargs)
-                
-                for _ in range(argc + kwargc - 1):            
+                print(stack, "\n", args, "\n", kwargs)
+
+                for _ in range(argc + kwargc - 1):
                     stack.pop()
-                
 
-                function = stack.pop()        
+                function = stack.pop()
 
-                instruction_class = self.get_instruction(function)  
-                instruction = instruction_class(*args, namespace=namespace, **kwargs)
-                instructions.append(instruction)  
+                instruction_class = self.get_instruction(function)
+                instruction = instruction_class(
+                    *args, namespace=namespace, **kwargs)
+                instructions.append(instruction)
 
-            elif ins.opname in ("BINARY_ADD", "BINARY_SUBTRACT", "BINARY_MULTIPLY"): 
+            elif ins.opname in ("BINARY_ADD", "BINARY_SUBTRACT", "BINARY_MULTIPLY", "BINARY_FLOOR_DIVIDE"):
                 right_operand = stack.pop()
                 left_operand = stack.pop()
 
@@ -233,16 +236,23 @@ class Compiler:
                 stack.append(result_register)
 
                 if ins.opname == "BINARY_ADD":
-                    instruction = Add(left_operand, right_operand, result_register, namespace=namespace)
+                    instruction = Add(left_operand, right_operand,
+                                      result_register, namespace=namespace)
 
                 if ins.opname == "BINARY_SUBTRACT":
-                    instruction = Subtract(left_operand, right_operand, result_register, namespace=namespace)
+                    instruction = Subtract(
+                        left_operand, right_operand, result_register, namespace=namespace)
 
                 if ins.opname == "BINARY_MULTIPLY":
-                    instruction = Multiply(left_operand, right_operand, result_register, namespace=namespace)
+                    instruction = Multiply(
+                        left_operand, right_operand, result_register, namespace=namespace)
+
+                if ins.opname == "BINARY_FLOOR_DIVIDE":
+                    instruction = Divide(
+                        left_operand, right_operand, result_register, namespace=namespace)
 
                 instructions.append(instruction)
-    
+
     def to_mips(self):
         self.compile()
 

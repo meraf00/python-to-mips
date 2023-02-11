@@ -4,28 +4,27 @@ class RegisterTracker:
 
     def __init__(self, compiler_stack):
         self.compiler_stack = compiler_stack
-        self.registers = set()        
+        self.registers = set()
 
         for i in range(8):
             self.registers.add(f"$t{i}")
-        
+
         for i in range(8):
-            self.registers.add(f"$s{i}")        
-    
+            self.registers.add(f"$s{i}")
+
     def allocate_register(self, dtype):
         unavailable = set()
         for item in self.compiler_stack:
             if isinstance(item, Register):
                 unavailable.add(item.name)
-        
+
         available_registers = self.registers.difference(unavailable)
 
         if len(available_registers) == 0:
-            raise(Exception("Run out of registers"))        
-        
+            raise (Exception("Run out of registers"))
+
         register_name = available_registers.pop()
         return Register(register_name, dtype)
-        
 
     def free_register(self, register_name):
         self.registers[register_name] = True
