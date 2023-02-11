@@ -1,6 +1,6 @@
 import dis
 from collections import defaultdict
-from .mips_instructions import Assign, Add, Subtract
+from .mips_instructions import Assign, Add, Subtract, Multiply
 from .mips_constructs import Register, RegisterTracker, Address
 from .consts import PREDEFINED_DATA_SEGMENTS, BUILT_INS
 
@@ -218,7 +218,7 @@ class Compiler:
                 instruction = instruction_class(*args, namespace=namespace, **kwargs)
                 instructions.append(instruction)  
 
-            elif ins.opname in set(("BINARY_ADD", "BINARY_SUBTRACT")): 
+            elif ins.opname in ("BINARY_ADD", "BINARY_SUBTRACT", "BINARY_MULTIPLY"): 
                 right_operand = stack.pop()
                 left_operand = stack.pop()
 
@@ -237,6 +237,9 @@ class Compiler:
 
                 if ins.opname == "BINARY_SUBTRACT":
                     instruction = Subtract(left_operand, right_operand, result_register, namespace=namespace)
+
+                if ins.opname == "BINARY_MULTIPLY":
+                    instruction = Multiply(left_operand, right_operand, result_register, namespace=namespace)
 
                 instructions.append(instruction)
     

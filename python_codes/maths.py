@@ -1,8 +1,8 @@
 x =  1
-y = 3
-z = x + y + 4 + 1
+y = 2
+z = x * y
 
-print(x)
-print(y)
-print(z)
-print(x + 1+z, [1, "a"])
+# a = x + y - z + z -y -x
+
+# print(a, "should be 0")
+# print(x+x+x-y, "should be 1")
