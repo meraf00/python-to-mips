@@ -230,3 +230,6 @@ class Conditional:
         if self.condition == "POP_JUMP_IF_FALSE":
             return f"""
                 beqz $v0, {self.jump_to}"""
+        elif self.condition == "POP_JUMP_IF_TRUE":
+            return f"""
+                bnez $v0, {self.jump_to}"""

@@ -4,10 +4,6 @@ j main # jump to main (entry point)
 
 # Library
 
-
-
-
-
 print_str:
                 lw $a0, 0($sp)
                 li $v0, 4
@@ -20,6 +16,16 @@ print_int:
                 syscall
                 jr $ra
         
+
+
+
+
+
+
+
+
+
+
 
 lt:				        # v0 = 0 if not lessthan
                                     # v0 = 1 if lessthan
@@ -94,83 +100,60 @@ lt_eq:			        # v0 = 0 if not less than or equal
                 jr $ra        
         
 
-
-
-
-
-
-
 # Functions
 
 main: # (Entry Point)
 
 
-                lw $t8, x
-                lw $t9, y
-                sw $t8, 0($sp)
-                sw $t9, 4($sp)
-                jal eq
+                li $t8, 0
+                lw $t9, x
+                sw $t9, 0($sp)
+                sw $t8, 4($sp)
+                jal gt
                 
 
 
                 beqz $v0, conditional_label_0
 
-
-                   lw $t8, a
-                   lw $t9, b
-                   add $s4, $t8, $t9
-
-
-                   move $a0, $s4
-                   li $v0, 1
-                   syscall
-
-                   li $a0, 10
-                   li $v0, 11
-                   syscall
-
-conditional_label_0:
-
-
-                    li $t1, 5
-                    sw $t1, a
-
-
-                    li $t1, 6
-                    sw $t1, b
-
-
-                   lw $t8, a
-                   lw $t9, b
-                   add $s4, $t8, $t9
-
-
-                   move $a0, $s4
-                   li $v0, 1
-                   syscall
-
-                   li $a0, 10
-                   li $v0, 11
-                   syscall
-
 conditional_label_1:
 
 
-                   la $t1, str_literal_0
+                   la $t1, x
                    sw $t1, 0($sp)    
-                   jal print_str
+                   jal print_int
 
                    li $a0, 10
                    li $v0, 11
                    syscall
+
+
+                li $t8, 1
+                lw $t9, x
+                sub $t7, $t9, $t8
+
+
+                   sw $t7, x
+
+
+                li $t8, 0
+                lw $t9, x
+                sw $t9, 0($sp)
+                sw $t8, 4($sp)
+                jal gt
+                
+
+
+                bnez $v0, conditional_label_1
+
+
+                    li $v0, 10
+                    syscall
+
+conditional_label_0:
 
 
                     li $v0, 10
                     syscall
 
 .data
-	x: .word 1
-	y: .word 2
-	a: .word 1
-	b: .word 2
-	str_literal_0: .asciiz "Bye"
+	x: .word 10

@@ -93,6 +93,11 @@ class Compiler:
         for ins in instruction_iter:
             print(ins)
             if ins.is_jump_target:
+                if ins.offset not in label_dict:
+                    label_name = f"conditional_label_{label_counter['conditional_label']}"
+                    label_dict[ins.offset] = Label(label_name)
+                    label_counter["conditional_label"] += 1
+
                 instructions.append(label_dict[ins.offset])
 
             if ins.opname == "LOAD_NAME":
@@ -278,14 +283,24 @@ class Compiler:
                     Compare(left_operand, right_operand, operation, namespace=namespace))
                 stack.append(Register("$v0", int))
 
-            elif ins.opname == "POP_JUMP_IF_FALSE":
-                print(ins, ins.offset, "<<<")
-                label_name = f"conditional_label_{label_counter['conditional_label']}"
-                label_dict[ins.argval] = Label(label_name)
-                label_counter["conditional_label"] += 1
+            elif ins.opname in ("POP_JUMP_IF_FALSE", "POP_JUMP_IF_TRUE"):
+                if ins.argval not in label_dict:
+                    label_name = f"conditional_label_{label_counter['conditional_label']}"
+                    label_dict[ins.argval] = Label(label_name)
+                    label_counter["conditional_label"] += 1
+
+                else:
+                    label_name = label_dict[ins.argval].label
 
                 instructions.append(
                     Conditional(ins.opname, jump_to=label_name, namespace=namespace))
+
+            elif ins.opname == "JUMP_FORWARD":
+                label_name = f"conditional_label_{label_counter['conditional_label']}"
+
+                if ins.argval not in label_dict:
+                    label_dict[ins.argval] = Label(label_name)
+                    label_counter["conditional_label"] += 1
 
             elif ins.opname == "RETURN_VALUE":
                 instructions.append(Exit())
