@@ -10,6 +10,25 @@ j main # jump to main (entry point)
 
 
 
+
+
+print_str:
+                lw $a0, 0($sp)
+                li $v0, 4
+                syscall
+                jr $ra
+print_int:
+                lw $a0, 0($sp)
+                lw $a0, ($a0)
+                li $v0, 1
+                syscall
+                jr $ra
+        
+
+
+
+
+
 lt:				        # v0 = 0 if not lessthan
                                     # v0 = 1 if lessthan
                 lw $a0, 0($sp)		# left operand
@@ -83,23 +102,6 @@ lt_eq:			        # v0 = 0 if not less than or equal
                 jr $ra        
         
 
-
-
-print_str:
-                lw $a0, 0($sp)
-                li $v0, 4
-                syscall
-                jr $ra
-print_int:
-                lw $a0, 0($sp)
-                lw $a0, ($a0)
-                li $v0, 1
-                syscall
-                jr $ra
-        
-
-
-
 # Functions
 
 main: # (Entry Point)
@@ -133,10 +135,10 @@ conditional_label_2:
 
                 li $t8, 1
                 lw $t9, x
-                sub $t0, $t9, $t8
+                sub $t1, $t9, $t8
 
 
-                   sw $t0, x
+                   sw $t1, x
 
 
                 j conditional_label_0
@@ -171,10 +173,10 @@ conditional_label_4:
 
                 li $t8, 1
                 lw $t9, x
-                sub $t0, $t9, $t8
+                sub $t1, $t9, $t8
 
 
-                   sw $t0, x
+                   sw $t1, x
 
 
                 li $t8, 0
@@ -269,6 +271,56 @@ conditional_label_6:
                    syscall
 
 
+                   la $t1, str_literal_5
+                   sw $t1, 0($sp)    
+                   jal print_str
+
+                   li $a0, 10
+                   li $v0, 11
+                   syscall
+
+
+            li $v0, 2
+            li $a2, 20
+            li $a3, 2
+            move $k0, $v0
+            
+
+conditional_label_8:
+
+
+                # sw $v0, None                
+                add $k0, $k0, $a3
+
+                blt $a3, 0, for_label_0
+
+                bgt $k0, $a2, conditional_label_9
+                j for_guard_0
+                for_label_0:
+                blt $k0, $a2, conditional_label_9
+                for_guard_0:  
+
+                move $v0, $k0              
+                
+
+
+                   sw $v0, j
+
+
+                   la $t1, j
+                   sw $t1, 0($sp)    
+                   jal print_int
+
+                   li $a0, 32
+                   li $v0, 11
+                   syscall
+
+
+                j conditional_label_8
+
+conditional_label_9:
+
+
                     li $v0, 10
                     syscall
 
@@ -279,3 +331,10 @@ conditional_label_6:
 	str_literal_2: .asciiz "bababa"
 	str_literal_3: .asciiz "hooo"
 	str_literal_4: .asciiz "herer"
+	str_literal_5: .asciiz "========== Evens! ============="
+	j: .word 0
+	str_literal_6: .asciiz " "
+	str_literal_7: .asciiz " "
+	str_literal_8: .asciiz "end"
+	str_literal_9: .asciiz "sep"
+	tuple_0: .word str_literal_8 str_literal_9

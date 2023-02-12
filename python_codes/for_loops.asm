@@ -14,6 +14,8 @@ j main # jump to main (entry point)
 
 
 
+
+
 print_str:
                 lw $a0, 0($sp)
                 li $v0, 4
@@ -26,8 +28,6 @@ print_int:
                 syscall
                 jr $ra
         
-
-
 
 # Functions
 
@@ -63,12 +63,12 @@ conditional_label_0:
 
                    lw $t8, x
                    lw $t9, y
-                   add $t3, $t8, $t9
+                   add $t6, $t8, $t9
 
 
-                   move $t8, $t3
+                   move $t8, $t6
                    lw $t9, i
-                   add $t3, $t8, $t9
+                   add $t6, $t8, $t9
 
 
                    la $t1, str_literal_0
@@ -79,8 +79,64 @@ conditional_label_0:
                    li $v0, 11
                    syscall
 
-                   move $a0, $t3
+                   move $a0, $t6
                    li $v0, 1
+                   syscall
+
+                   li $a0, 32
+                   li $v0, 11
+                   syscall
+
+                   li $a0, 91
+                   li $v0, 11
+                   syscall
+
+                   la $t1, i
+                   sw $t1, 0($sp)    
+                   jal print_int
+
+                   li $a0, 0
+                   li $v0, 11
+                   syscall
+
+                   li $a0, 93
+                   li $v0, 11
+                   syscall
+
+                   li $a0, 32
+                   li $v0, 11
+                   syscall
+
+                   li $a0, 91
+                   li $v0, 11
+                   syscall
+
+                   li $a0, 1
+                   li $v0, 1
+                   syscall
+
+                   li $a0, 44
+                   li $v0, 11
+                   syscall
+
+                   li $a0, 2
+                   li $v0, 1
+                   syscall
+
+                   li $a0, 44
+                   li $v0, 11
+                   syscall
+
+                   la $t1, i
+                   sw $t1, 0($sp)    
+                   jal print_int
+
+                   li $a0, 0
+                   li $v0, 11
+                   syscall
+
+                   li $a0, 93
+                   li $v0, 11
                    syscall
 
                    li $a0, 10
@@ -126,5 +182,8 @@ conditional_label_1:
 	i: .word 0
 	x: .word 1
 	y: .word 5
+	list_0: .word 1 2 i
+	z: .word 1 2 i
 	str_literal_0: .asciiz ">>>"
+	list_1: .word i
 	str_literal_1: .asciiz ">>>"

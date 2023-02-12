@@ -218,13 +218,13 @@ class Compiler:
                 stack.append(Register("$v0", instruction_class.return_type))
 
             elif ins.opname == "CALL_FUNCTION_KW":
-                keys = namespace[stack[-1]]
-
+                keys = list(namespace[k] for k in namespace[stack[-1]])
+                
                 argc = ins.arg
                 kwargc = len(keys)
 
-                args = stack[-(argc+kwargc-1):-(kwargc+1)]
-                kwargs_values = stack[-(kwargc+1):-1]
+                args = stack[-(argc+ 2 * kwargc - 1 ):-(2 * kwargc + 1)]
+                kwargs_values = stack[-(2 * kwargc + 1):-1]
 
                 kwargs = {}
                 for key, value in zip(keys, kwargs_values):
@@ -232,9 +232,9 @@ class Compiler:
 
                 print(stack, "\n?", args, "\n?", kwargs)
 
-                for _ in range(argc + kwargc - 1):
+                for _ in range(argc + 2*kwargc - 1):
                     stack.pop()
-
+                
                 function = stack.pop()
 
                 instruction_class = self.get_instruction(function)

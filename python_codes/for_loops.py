@@ -1,7 +1,8 @@
 for i in range(10):
     x = 1
     y = 5
-    print(">>>", x + y + i)
+    z = [1, 2, i]
+    print(">>>", x + y + i, [i], z)
     print(i)
 
 print(">>>", i)

@@ -18,3 +18,7 @@ else:
     print("hooo")
 
 print("herer")
+
+print("========== Evens! =============")
+for j in range(2, 20, 2):
+    print(j, end=" ", sep=" ")

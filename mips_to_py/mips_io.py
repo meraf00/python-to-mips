@@ -25,8 +25,8 @@ class Print:
 
         self.namespace = namespace
 
-        self.end = kwargs.get("end", "\n")
-        self.sep = kwargs.get("sep", " ")
+        self.end = namespace.get(kwargs.get("end", ""), "\n")
+        self.sep = namespace.get(kwargs.get("sep", ""), " ")
 
         if len(self.sep) > 1:
             self.sep = self.sep[0]
