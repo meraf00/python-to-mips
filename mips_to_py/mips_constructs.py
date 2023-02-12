@@ -65,6 +65,29 @@ class MemoryLocation:
         return hash(self.location)
 
 
+class Label:
+    REQUIRE = tuple()
+    INCLUDE = tuple()
+
+    def __init__(self, label_name):
+        self.label = label_name
+
+    def __str__(self):
+        return f"{self.label}"
+
+    def __repr__(self):
+        return f"<{self.label}>"
+
+    def __eq__(self, other):
+        return self.__hash__() == other.__hash__()
+
+    def __hash__(self):
+        return hash(self.label)
+
+    def mips_code(self):
+        return f"{self.label}:"
+
+
 class Address:
     def __init__(self, address_name):
         self.address_name = address_name

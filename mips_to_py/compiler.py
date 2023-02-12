@@ -1,7 +1,8 @@
 import dis
 from collections import defaultdict
-from .mips_instructions import Assign, Add, Subtract, Multiply, Divide
-from .mips_constructs import MemoryLocation, Register, RegisterTracker, Address
+from .mips_instructions import Assign, Add, Exit, Subtract, Multiply, Divide
+from .mips_conditionals import Compare, Conditional
+from .mips_constructs import Label, MemoryLocation, Register, RegisterTracker, Address
 from .consts import PREDEFINED_DATA_SEGMENTS, BUILT_INS
 
 
@@ -11,6 +12,7 @@ class Compiler:
         self.stack = []
         self.namespace = {}
         self.data_type_counter = defaultdict(int)
+        self.label_counter = defaultdict(int)
         self.registers = RegisterTracker(self.stack)
 
         self.instructions = []
@@ -81,16 +83,24 @@ class Compiler:
         instructions = self.instructions
         registers = self.registers
         data_type_counter = self.data_type_counter
+        label_counter = self.label_counter
+
+        label_dict = {}
         stack = self.stack
 
-        for ins in dis.get_instructions(python_code):
-            
+        instruction_iter = dis.get_instructions(python_code)
+        prev_instruction = None
+        for ins in instruction_iter:
+            print(ins)
+            if ins.is_jump_target:
+                instructions.append(label_dict[ins.offset])
+
             if ins.opname == "LOAD_NAME":
                 name = Address(ins.argval)
                 if name in namespace or name in BUILT_INS:
                     stack.append(name)
 
-            elif ins.opname in set(("STORE_NAME", "STORE_FAST", "STORE_GLOBAL")):
+            elif ins.opname in ("STORE_NAME", "STORE_FAST", "STORE_GLOBAL"):
                 address = Address(ins.argval)
                 value = stack.pop()
 
@@ -258,7 +268,29 @@ class Compiler:
                         left_operand, right_operand, result_register, namespace=namespace)
 
                 instructions.append(instruction)
-            print(ins)
+
+            elif ins.opname == "COMPARE_OP":
+                right_operand = stack.pop()
+                left_operand = stack.pop()
+                operation = ins.argval
+
+                instructions.append(
+                    Compare(left_operand, right_operand, operation, namespace=namespace))
+                stack.append(Register("$v0", int))
+
+            elif ins.opname == "POP_JUMP_IF_FALSE":
+                print(ins, ins.offset, "<<<")
+                label_name = f"conditional_label_{label_counter['conditional_label']}"
+                label_dict[ins.argval] = Label(label_name)
+                label_counter["conditional_label"] += 1
+
+                instructions.append(
+                    Conditional(ins.opname, jump_to=label_name, namespace=namespace))
+
+            elif ins.opname == "RETURN_VALUE":
+                instructions.append(Exit())
+
+            prev_instruction = ins.opname
             print(stack,  namespace, end="\n\n")
 
     def to_mips(self):

@@ -368,3 +368,13 @@ class Divide:
 
         elif isinstance(self.left_operand, Register) and isinstance(self.right_operand, int):
             return self.sub_immediate_and_register(self.right_operand, self.left_operand)
+
+
+class Exit:
+    REQUIRE = tuple()
+    INCLUDE = tuple()
+
+    def mips_code(self):
+        return f"""
+                    li $v0, 10
+                    syscall"""
