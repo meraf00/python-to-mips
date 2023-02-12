@@ -16,6 +16,7 @@ if __name__ == "__main__":
     fname = "io"
     fname = "conditionals"
     fname = "loops"
+    fname = "for_loops"
 
     py_source_code = load_file(f"python_codes/{fname}.py")
     import dis

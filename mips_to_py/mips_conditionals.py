@@ -221,15 +221,86 @@ class Conditional:
     INCLUDE = ()
     REQUIRE = ()
 
-    def __init__(self, condition, jump_to, namespace=None):
+    def __init__(self, condition, jump_to, label_counter, iter_val=None, namespace=None):
         self.namespace = namespace
         self.condition = condition
         self.jump_to = jump_to
+        self.label_counter = label_counter
+        self.iter_var = iter_val
 
     def mips_code(self):
         if self.condition == "POP_JUMP_IF_FALSE":
             return f"""
                 beqz $v0, {self.jump_to}"""
+
         elif self.condition == "POP_JUMP_IF_TRUE":
             return f"""
                 bnez $v0, {self.jump_to}"""
+
+        elif self.condition == "JUMP_FORWARD":
+            return f"""
+                j {self.jump_to}"""
+        
+        elif self.condition == "JUMP_ABSOLUTE":
+            return f"""
+                j {self.jump_to}"""
+
+        elif self.condition == "FOR_ITER":
+            decreasing_range = f"for_label_{self.label_counter['for_loop']}"
+            self.label_counter["for_loop"] += 1
+
+            end_guard = f"for_guard_{self.label_counter['for_loop_guard']}"
+            self.label_counter["for_loop_guard"] += 1
+
+            return f"""
+                # sw $v0, {self.iter_var}                
+                add $k0, $k0, $a3
+
+                blt $a3, 0, {decreasing_range}
+
+                bgt $k0, $a2, {self.jump_to}
+                j {end_guard}
+                {decreasing_range}:
+                blt $k0, $a2, {self.jump_to}
+                {end_guard}:  
+
+                move $v0, $k0              
+                """
+
+
+class Range:
+    INCLUDE = tuple()
+    REQUIRE = tuple()
+
+    return_type = int
+
+    def __init__(self, *args, namespace=None):
+        if len(args) == 3:
+            start, end, step = args
+        elif len(args) == 2:
+            start, end = args
+            step = 1
+        elif len(args) == 1:
+            end = args[0]
+            start, step = 0, 1
+
+        self.start = start
+        self.step = step
+        self.end = end
+        self.namespace = namespace
+
+    def get_load_instruction(self, arg):
+        if isinstance(arg, int):
+            return "li"
+        elif isinstance(arg, Address):
+            return "lw"
+        elif isinstance(arg, Register):
+            return "move"
+
+    def mips_code(self):
+        return f"""
+            {self.get_load_instruction(self.start)} $v0, {self.start}
+            {self.get_load_instruction(self.end)} $a2, {self.end}
+            {self.get_load_instruction(self.step)} $a3, {self.step}
+            move $k0, $v0
+            """

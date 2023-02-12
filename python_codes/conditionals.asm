@@ -4,23 +4,6 @@ j main # jump to main (entry point)
 
 # Library
 
-
-
-
-
-print_str:
-                lw $a0, 0($sp)
-                li $v0, 4
-                syscall
-                jr $ra
-print_int:
-                lw $a0, 0($sp)
-                lw $a0, ($a0)
-                li $v0, 1
-                syscall
-                jr $ra
-        
-
 lt:				        # v0 = 0 if not lessthan
                                     # v0 = 1 if lessthan
                 lw $a0, 0($sp)		# left operand
@@ -98,6 +81,23 @@ lt_eq:			        # v0 = 0 if not less than or equal
 
 
 
+print_str:
+                lw $a0, 0($sp)
+                li $v0, 4
+                syscall
+                jr $ra
+print_int:
+                lw $a0, 0($sp)
+                lw $a0, ($a0)
+                li $v0, 1
+                syscall
+                jr $ra
+        
+
+
+
+
+
 
 
 # Functions
@@ -118,10 +118,10 @@ main: # (Entry Point)
 
                    lw $t8, a
                    lw $t9, b
-                   add $s4, $t8, $t9
+                   add $t1, $t8, $t9
 
 
-                   move $a0, $s4
+                   move $a0, $t1
                    li $v0, 1
                    syscall
 
@@ -129,7 +129,35 @@ main: # (Entry Point)
                    li $v0, 11
                    syscall
 
+
+                bnez $v0, conditional_label_1
+
 conditional_label_0:
+
+
+                li $t8, 1
+                lw $t9, x
+                sw $t9, 0($sp)
+                sw $t8, 4($sp)
+                jal eq
+                
+
+
+                beqz $v0, conditional_label_2
+
+
+                   la $t1, str_literal_0
+                   sw $t1, 0($sp)    
+                   jal print_str
+
+                   li $a0, 10
+                   li $v0, 11
+                   syscall
+
+
+                bnez $v0, conditional_label_1
+
+conditional_label_2:
 
 
                     li $t1, 5
@@ -142,10 +170,10 @@ conditional_label_0:
 
                    lw $t8, a
                    lw $t9, b
-                   add $s4, $t8, $t9
+                   add $t1, $t8, $t9
 
 
-                   move $a0, $s4
+                   move $a0, $t1
                    li $v0, 1
                    syscall
 
@@ -156,7 +184,7 @@ conditional_label_0:
 conditional_label_1:
 
 
-                   la $t1, str_literal_0
+                   la $t1, str_literal_1
                    sw $t1, 0($sp)    
                    jal print_str
 
@@ -173,4 +201,5 @@ conditional_label_1:
 	y: .word 2
 	a: .word 1
 	b: .word 2
-	str_literal_0: .asciiz "Bye"
+	str_literal_0: .asciiz "The elif statement"
+	str_literal_1: .asciiz "Bye"

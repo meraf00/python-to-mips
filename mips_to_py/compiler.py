@@ -89,7 +89,7 @@ class Compiler:
         stack = self.stack
 
         instruction_iter = dis.get_instructions(python_code)
-        prev_instruction = None
+
         for ins in instruction_iter:
             print(ins)
             if ins.is_jump_target:
@@ -283,7 +283,7 @@ class Compiler:
                     Compare(left_operand, right_operand, operation, namespace=namespace))
                 stack.append(Register("$v0", int))
 
-            elif ins.opname in ("POP_JUMP_IF_FALSE", "POP_JUMP_IF_TRUE"):
+            elif ins.opname in ("POP_JUMP_IF_FALSE", "POP_JUMP_IF_TRUE", "JUMP_FORWARD", "FOR_ITER", "JUMP_ABSOLUTE"):
                 if ins.argval not in label_dict:
                     label_name = f"conditional_label_{label_counter['conditional_label']}"
                     label_dict[ins.argval] = Label(label_name)
@@ -293,19 +293,11 @@ class Compiler:
                     label_name = label_dict[ins.argval].label
 
                 instructions.append(
-                    Conditional(ins.opname, jump_to=label_name, namespace=namespace))
-
-            elif ins.opname == "JUMP_FORWARD":
-                label_name = f"conditional_label_{label_counter['conditional_label']}"
-
-                if ins.argval not in label_dict:
-                    label_dict[ins.argval] = Label(label_name)
-                    label_counter["conditional_label"] += 1
+                    Conditional(ins.opname, jump_to=label_name, label_counter=label_counter, namespace=namespace))
 
             elif ins.opname == "RETURN_VALUE":
                 instructions.append(Exit())
 
-            prev_instruction = ins.opname
             print(stack,  namespace, end="\n\n")
 
     def to_mips(self):

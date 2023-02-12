@@ -4,23 +4,6 @@ j main # jump to main (entry point)
 
 # Library
 
-print_str:
-                lw $a0, 0($sp)
-                li $v0, 4
-                syscall
-                jr $ra
-print_int:
-                lw $a0, 0($sp)
-                lw $a0, ($a0)
-                li $v0, 1
-                syscall
-                jr $ra
-        
-
-
-
-
-
 
 
 
@@ -100,9 +83,28 @@ lt_eq:			        # v0 = 0 if not less than or equal
                 jr $ra        
         
 
+
+
+print_str:
+                lw $a0, 0($sp)
+                li $v0, 4
+                syscall
+                jr $ra
+print_int:
+                lw $a0, 0($sp)
+                lw $a0, ($a0)
+                li $v0, 1
+                syscall
+                jr $ra
+        
+
+
+
 # Functions
 
 main: # (Entry Point)
+
+conditional_label_0:
 
 
                 li $t8, 0
@@ -113,9 +115,49 @@ main: # (Entry Point)
                 
 
 
-                beqz $v0, conditional_label_0
+                beqz $v0, conditional_label_1
 
-conditional_label_1:
+conditional_label_2:
+
+
+                li $t8, 5
+                lw $t9, x
+                sw $t9, 0($sp)
+                sw $t8, 4($sp)
+                jal eq
+                
+
+
+                beqz $v0, conditional_label_3
+
+
+                li $t8, 1
+                lw $t9, x
+                sub $t0, $t9, $t8
+
+
+                   sw $t0, x
+
+
+                j conditional_label_0
+
+conditional_label_3:
+
+
+                li $t8, 2
+                lw $t9, x
+                sw $t9, 0($sp)
+                sw $t8, 4($sp)
+                jal eq
+                
+
+
+                beqz $v0, conditional_label_4
+
+
+                j conditional_label_1
+
+conditional_label_4:
 
 
                    la $t1, x
@@ -129,10 +171,10 @@ conditional_label_1:
 
                 li $t8, 1
                 lw $t9, x
-                sub $t7, $t9, $t8
+                sub $t0, $t9, $t8
 
 
-                   sw $t7, x
+                   sw $t0, x
 
 
                 li $t8, 0
@@ -143,13 +185,88 @@ conditional_label_1:
                 
 
 
-                bnez $v0, conditional_label_1
+                bnez $v0, conditional_label_2
+
+conditional_label_1:
 
 
-                    li $v0, 10
-                    syscall
+                   la $t1, str_literal_0
+                   sw $t1, 0($sp)    
+                   jal print_str
 
-conditional_label_0:
+                   li $a0, 10
+                   li $v0, 11
+                   syscall
+
+
+                li $t8, 3
+                lw $t9, x
+                sw $t9, 0($sp)
+                sw $t8, 4($sp)
+                jal eq
+                
+
+
+                beqz $v0, conditional_label_5
+
+
+                   la $t1, str_literal_1
+                   sw $t1, 0($sp)    
+                   jal print_str
+
+                   li $a0, 10
+                   li $v0, 11
+                   syscall
+
+
+                j conditional_label_6
+
+conditional_label_5:
+
+
+                li $t8, 0
+                lw $t9, x
+                sw $t9, 0($sp)
+                sw $t8, 4($sp)
+                jal eq
+                
+
+
+                beqz $v0, conditional_label_7
+
+
+                   la $t1, str_literal_2
+                   sw $t1, 0($sp)    
+                   jal print_str
+
+                   li $a0, 10
+                   li $v0, 11
+                   syscall
+
+
+                j conditional_label_6
+
+conditional_label_7:
+
+
+                   la $t1, str_literal_3
+                   sw $t1, 0($sp)    
+                   jal print_str
+
+                   li $a0, 10
+                   li $v0, 11
+                   syscall
+
+conditional_label_6:
+
+
+                   la $t1, str_literal_4
+                   sw $t1, 0($sp)    
+                   jal print_str
+
+                   li $a0, 10
+                   li $v0, 11
+                   syscall
 
 
                     li $v0, 10
@@ -157,3 +274,8 @@ conditional_label_0:
 
 .data
 	x: .word 10
+	str_literal_0: .asciiz "WHy"
+	str_literal_1: .asciiz "apple"
+	str_literal_2: .asciiz "bababa"
+	str_literal_3: .asciiz "hooo"
+	str_literal_4: .asciiz "herer"
